@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Loja do Anzol</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <main class="fullpage">
+    <header class="brand">
+      <h1>Loja do Anzol</h1>
+      <p class="subtitle">Bem-vindo! Como podemos ajudar você hoje?</p>
+    </header>
+
+    <section class="actions-home">
+      <a href="/catalogo" class="btn-hero secondary-hero">
+        <span>Ver Catálogo</span>
+        <small>Confira nossos melhores produtos</small>
+      </a>
+
+      <a href="https://wa.me/5512981025592?text=Olá! Vim da página inicial da Loja do Anzol."
+         target="_blank"
+         class="btn-hero btn-especialista">
+        <i class="fab fa-whatsapp" style="font-size: 2rem; margin-bottom: 10px;"></i>
+        <span>Falar com Especialista</span>
+        <small>Tire dúvidas via WhatsApp</small>
+      </a>
+    </section>
+
+    <footer class="footer">
+      <small>© 2026 — Projeto Loja do Anzol</small>
+    </footer>
+  </main>
+</body>
+</html>
