@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo - Loja do Anzol</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<main class="fullpage">
+    <header class="brand">
+        <h1>Nossos Produtos</h1>
+        <p class="subtitle">Equipamento profissional para sua pescaria</p>
+    </header>
+
+    <section class="actions">
+        {% for p in produtos %}
+        <a href="https://wa.me/5512981025592?text=Olá!+Quero+saber+mais+sobre+{{ p.nome }}"
+           target="_blank"
+           class="product-card blue-block">
+            <h2>{{ p.nome }}</h2>
+            <div class="price">R$ {{ "%.2f"|format(p.preco) }}</div>
+        </a>
+        {% endfor %}
+    </section> <div style="margin: 40px 0; text-align: center;">
+        <a href="https://wa.me/5512981025592?text=Olá!+Gostaria+de+falar+com+um+especialista."
+           target="_blank"
+           class="btn-especialista">
+           <i class="fab fa-whatsapp"></i> Falar com Especialista
+        </a>
+    </div>
+
+    <footer>
+        <a href="/" style="color: #64748b; text-decoration: none;">← Voltar ao Início</a>
+    </footer>
+</main>
+
+</body>
+</html>
