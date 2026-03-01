@@ -1,41 +1,76 @@
-<!doctype html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo - Loja do Anzol</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
+{% extends "base.html" %}
 
-<main class="fullpage">
-    <header class="brand">
-        <h1>Nossos Produtos</h1>
-        <p class="subtitle">Equipamento profissional para sua pescaria</p>
+{% block title %}Catálogo - CNC Imports{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header class="catalogo-header">
+        {% if request.args.get('busca') %}
+            <h2>Resultados para: "{{ request.args.get('busca') }}"</h2>
+        {% elif categoria_ativa %}
+            <h2>Categoria: {{ categoria_ativa | capitalize }}</h2>
+        {% else %}
+            <h1>Catálogo de Produtos</h1>
+            <p>Fresas, ferramentas e muito mais para sua indústria</p>
+        {% endif %}
+        <p style="text-align: center; color: #666; margin-top: 5px;">
+            Mostrando {{ produtos|length }} de {{ pagination.total }} produtos
+        </p>
     </header>
 
-    <section class="actions">
-        {% for p in produtos %}
-        <a href="https://wa.me/5512981025592?text=Olá!+Quero+saber+mais+sobre+{{ p.nome }}"
-           target="_blank"
-           class="product-card blue-block">
-            <h2>{{ p.nome }}</h2>
-            <div class="price">R$ {{ "%.2f"|format(p.preco) }}</div>
-        </a>
+    <section class="product-grid">
+        {% for produto in produtos %}
+        <div class="product-card">
+            <div class="promo-img-container">
+                <img src="{{ url_for('static', filename='img/produtos/' + produto.imagem) }}"
+                     alt="{{ produto.nome }}"
+                     onerror="this.src='{{ url_for('static', filename='img/produtos/placeholder.jpg') }}'">
+            </div>
+
+            <div class="card-info">
+                <h3 class="product-title">{{ produto.nome }}</h3>
+
+                <div class="product-price">
+                    <span class="price-val">R$ {{ "%.2f"|format(produto.preco)|replace('.', ',') }}</span>
+                    <span class="unit">/ {{ produto.unidade }}</span>
+                </div>
+
+                <button class="btn-buy"
+                        onclick="adicionarAoCarrinho('{{ produto.id }}', '{{ produto.nome }}', '{{ produto.preco }}', '{{ produto.unidade }}')">
+                    <i class="fas fa-cart-plus"></i> Adicionar
+                </button>
+            </div>
+        </div>
+        {% else %}
+            <p style="text-align: center; grid-column: 1 / -1; padding: 40px; color: #888;">
+                Nenhum produto encontrado nesta categoria.
+            </p>
         {% endfor %}
-    </section> <div style="margin: 40px 0; text-align: center;">
-        <a href="https://wa.me/5512981025592?text=Olá!+Gostaria+de+falar+com+um+especialista."
-           target="_blank"
-           class="btn-especialista">
-           <i class="fab fa-whatsapp"></i> Falar com Especialista
-        </a>
+    </section>
+
+    <!-- Paginação -->
+    {% if pagination.pages > 1 %}
+    <div class="pagination">
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('catalogo', page=pagination.prev_num, cat=categoria_ativa, busca=busca) }}" class="btn-pagination">&laquo; Anterior</a>
+        {% endif %}
+
+        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == pagination.page %}
+                    <span class="btn-pagination current">{{ page_num }}</span>
+                {% else %}
+                    <a href="{{ url_for('catalogo', page=page_num, cat=categoria_ativa, busca=busca) }}" class="btn-pagination">{{ page_num }}</a>
+                {% endif %}
+            {% else %}
+                <span class="btn-pagination dots">…</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if pagination.has_next %}
+            <a href="{{ url_for('catalogo', page=pagination.next_num, cat=categoria_ativa, busca=busca) }}" class="btn-pagination">Próxima &raquo;</a>
+        {% endif %}
     </div>
-
-    <footer>
-        <a href="/" style="color: #64748b; text-decoration: none;">← Voltar ao Início</a>
-    </footer>
-</main>
-
-</body>
-</html>
+    {% endif %}
+</div>
+{% endblock %}

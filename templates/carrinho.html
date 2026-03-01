@@ -1,0 +1,450 @@
+{% extends "base.html" %}
+
+{% block title %}Finalizar Pedido - CNC Imports{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <h2 class="checkout-title"><i class="fas fa-shopping-cart"></i> Finalizar Pedido</h2>
+
+    <div class="checkout-grid">
+        <div class="card-entrega-verde">
+            <h3><i class="fas fa-truck"></i> Informações de Entrega</h3>
+            <form id="form-checkout">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="checkout-nome" placeholder="Quem receberá o pedido?">
+                </div>
+
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>WhatsApp</label>
+                        <input type="text" id="checkout-whatsapp" placeholder="(12) 99999-9999">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>E-mail</label>
+                        <input type="email" id="checkout-email" placeholder="seu@email.com">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>CEP</label>
+                        <input type="text" id="checkout-cep" placeholder="12345-678" onblur="validarEProcessarEndereco()">
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label>Endereço</label>
+                        <input type="text" id="checkout-rua" placeholder="Rua, Avenida, Praça...">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Número</label>
+                        <input type="text" id="checkout-numero" placeholder="123">
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label>Complemento</label>
+                        <input type="text" id="checkout-complemento" placeholder="Apto, Bloco, Casa...">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Melhor Horário para Entrega</label>
+                    <select id="checkout-horario">
+                        <option value="" disabled selected>Selecione um período</option>
+                        <option value="Manhã (08h às 12h)">Manhã (08h às 12h)</option>
+                        <option value="Tarde (13h às 18h)">Tarde (13h às 18h)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Forma de Pagamento</label>
+                    <select id="checkout-pagamento">
+                        <option value="entrega" selected>Pagamento na Entrega</option>
+                        <option value="pix_manual">PIX (5% de desconto)</option>
+                        <option value="cartao">Cartão (Mercado Pago)</option>
+                    </select>
+                </div>
+
+            </form>
+        </div>
+
+        <div class="order-summary-card">
+            <h3><i class="fas fa-receipt"></i> Resumo da Compra</h3>
+
+            <div id="lista-produtos-checkout" class="checkout-items-list"></div>
+
+            <div class="summary-box">
+                <div class="summary-line">
+                    <span>Subtotal:</span>
+                    <span id="subtotal-valor">R$ 0,00</span>
+                </div>
+
+                <div class="summary-line highlight-green" id="linha-frete">
+                    <span>Frete:</span>
+                    <span id="frete-valor">Digite o CEP...</span>
+                </div>
+                <div id="info-distancia" class="distancia-info"></div>
+
+                <div id="aviso-frete-gratis" class="aviso-gratis-box" style="display:none;"></div>
+
+                <hr>
+                <div class="summary-line total">
+                    <span>Total Geral:</span>
+                    <span id="total-geral">R$ 0,00</span>
+                </div>
+            </div>
+
+            <div id="area-botao-finalizar">
+                <button onclick="enviarPedidoFinal()" id="btn-finalizar" class="btn-buy disabled" style="width: 100%; margin-top: 20px;" disabled>
+                    <i class="fab fa-whatsapp"></i> Finalizar Pedido
+                </button>
+                <p id="msg-pedido-minimo" style="color: #e74c3c; font-size: 0.8rem; text-align: center; margin-top: 10px; display: none;">
+                    O valor mínimo para entrega é R$ <span id="val-min-label">0,00</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Função para obter a chave do carrinho no localStorage (definida no base.html, mas redefinimos para garantir)
+    function getCartKey() {
+        const userEmail = "{{ session.get('user', {}).get('email', 'visitante') }}";
+        return 'cnc_cart_' + userEmail;
+    }
+
+    // Usa a variável global carrinho (declarada no base.html) - não redeclarar com let
+    carrinho = JSON.parse(localStorage.getItem(getCartKey())) || [];
+    const userSession = {{ user | tojson if user else 'null' }};
+    let configsLoja = {};
+    let valorFreteGlobal = 0;
+
+    async function inicializarCarrinho() {
+        // Atualiza o carrinho a partir do localStorage
+        carrinho = JSON.parse(localStorage.getItem(getCartKey())) || [];
+
+        if (carrinho.length === 0) {
+            alert("Seu carrinho está vazio!");
+            window.location.href = "/catalogo";
+            return;
+        }
+
+        const resConfig = await fetch('/api/config_entrega');
+        configsLoja = await resConfig.json();
+        document.getElementById('val-min-label').innerText = configsLoja.valor_pedido_minimo.toFixed(2).replace('.', ',');
+
+        if (userSession && userSession !== 'null') {
+            document.getElementById('checkout-nome').value = userSession.nome || '';
+            document.getElementById('checkout-whatsapp').value = userSession.telefone || '';
+            document.getElementById('checkout-email').value = userSession.email || '';
+            document.getElementById('checkout-cep').value = userSession.cep || '';
+            document.getElementById('checkout-rua').value = userSession.endereco || '';
+            document.getElementById('checkout-numero').value = userSession.numero || '';
+            document.getElementById('checkout-complemento').value = userSession.complemento || '';
+        }
+
+        renderizarResumo();
+
+        if (document.getElementById('checkout-cep').value.length >= 8) {
+            calcularFreteReal();
+        }
+    }
+
+    function renderizarResumo() {
+        const lista = document.getElementById('lista-produtos-checkout');
+        let subtotal = 0;
+        lista.innerHTML = '';
+
+        carrinho.forEach(item => {
+            const sub = item.preco * item.quantidade;
+            subtotal += sub;
+            lista.innerHTML += `
+                <div class="checkout-item-row">
+                    <span>${item.quantidade}${item.unidade} x ${item.nome}</span>
+                    <strong>R$ ${sub.toFixed(2).replace('.', ',')}</strong>
+                </div>`;
+        });
+
+        document.getElementById('subtotal-valor').innerText = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+
+        const btn = document.getElementById('btn-finalizar');
+        const msgMinimo = document.getElementById('msg-pedido-minimo');
+
+        if (subtotal < configsLoja.valor_pedido_minimo) {
+            btn.disabled = true;
+            btn.classList.add('disabled');
+            msgMinimo.style.display = 'block';
+        } else {
+            btn.disabled = false;
+            btn.classList.remove('disabled');
+            msgMinimo.style.display = 'none';
+        }
+
+        const avisoGratis = document.getElementById('aviso-frete-gratis');
+        if (subtotal < configsLoja.frete_gratis_valor) {
+            const falta = configsLoja.frete_gratis_valor - subtotal;
+            avisoGratis.innerHTML = `<i class="fas fa-info-circle"></i> Adicione mais <strong>R$ ${falta.toFixed(2).replace('.', ',')}</strong> para ganhar <strong>FRETE GRÁTIS!</strong>`;
+            avisoGratis.style.display = 'block';
+        } else {
+            avisoGratis.style.display = 'none';
+        }
+
+        atualizarTotalGeral(subtotal);
+    }
+
+    async function validarEProcessarEndereco() {
+        let cep = document.getElementById('checkout-cep').value.replace(/\D/g, '');
+        if (cep.length === 8) {
+            const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const data = await res.json();
+            if (!data.erro) {
+                if(!document.getElementById('checkout-rua').value) {
+                    document.getElementById('checkout-rua').value = data.logradouro;
+                }
+                calcularFreteReal();
+            } else {
+                alert("CEP não encontrado.");
+            }
+        }
+    }
+
+    async function calcularFreteReal() {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const cepDestino = document.getElementById('checkout-cep').value.replace(/\D/g, '');
+        const freteTexto = document.getElementById('frete-valor');
+        const distInfo = document.getElementById('info-distancia');
+
+        if (cepDestino.length !== 8) {
+            freteTexto.innerText = "CEP inválido";
+            return;
+        }
+
+        let subtotal = 0;
+        carrinho.forEach(item => subtotal += (item.preco * item.quantidade));
+
+        freteTexto.innerText = "Calculando...";
+
+        try {
+            const response = await fetch('/api/calcular-frete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ cep: cepDestino, valor_carrinho: subtotal })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                valorFreteGlobal = parseFloat(data.valor_frete);
+                freteTexto.innerText = valorFreteGlobal === 0 ? "GRÁTIS" : `R$ ${valorFreteGlobal.toFixed(2).replace('.', ',')}`;
+                distInfo.innerText = (data.distancia && data.distancia !== "N/A") ? `Distância: ${data.distancia} km` : "";
+                atualizarTotalGeral(subtotal);
+            } else {
+                console.error('Erro no cálculo de frete:', data);
+                freteTexto.innerText = "Erro ao calcular";
+            }
+        } catch (e) {
+            console.error('Exceção no fetch:', e);
+            freteTexto.innerText = "Erro ao calcular";
+        }
+    }
+
+    function atualizarTotalGeral(subtotal) {
+        const total = subtotal + valorFreteGlobal;
+        document.getElementById('total-geral').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    }
+
+    async function enviarPedidoFinal() {
+        const itensParaEnviar = JSON.parse(localStorage.getItem(getCartKey())) || [];
+
+        if (itensParaEnviar.length === 0) {
+            alert("Carrinho vazio!");
+            window.location.href = "/catalogo";
+            return;
+        }
+
+        const campos = ['checkout-nome', 'checkout-whatsapp', 'checkout-cep', 'checkout-numero', 'checkout-horario'];
+        for (let id of campos) {
+            const input = document.getElementById(id);
+            if (!input || !input.value.trim()) {
+                alert("Por favor, preencha todos os campos obrigatórios!");
+                if(input) input.focus();
+                return;
+            }
+        }
+
+        const btn = document.getElementById('btn-finalizar');
+        const formaPagamento = document.getElementById('checkout-pagamento').value;
+
+        if (formaPagamento === 'cartao') {
+            await processarPagamentoCartao(itensParaEnviar, btn);
+        } else if (formaPagamento === 'pix_manual') {
+            await processarPagamentoPixManual(itensParaEnviar, btn);
+        } else {
+            await processarPagamentoEntrega(itensParaEnviar, btn);
+        }
+    }
+
+    // Função para pagamento na entrega (já existente, mas ajustada para receber btn)
+    async function processarPagamentoEntrega(itens, btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        const dadosPedido = {
+            cliente_nome: document.getElementById('checkout-nome').value,
+            whatsapp: document.getElementById('checkout-whatsapp').value,
+            email: document.getElementById('checkout-email').value,
+            cep: document.getElementById('checkout-cep').value,
+            endereco: document.getElementById('checkout-rua').value,
+            numero: document.getElementById('checkout-numero').value,
+            complemento: document.getElementById('checkout-complemento').value,
+            pagamento: document.getElementById('checkout-pagamento').value,
+            horario_entrega: document.getElementById('checkout-horario').value,
+            itens: itens.map(item => ({ id: item.id, quantidade: item.quantidade }))
+        };
+
+        try {
+            const res = await fetch('/api/processar-pedido', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(dadosPedido)
+            });
+
+            const respostaServidor = await res.json();
+
+            if (res.ok) {
+                localStorage.removeItem(getCartKey());
+                const totalFormatado = respostaServidor.total_final.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                alert(`Pedido #${respostaServidor.pedido} realizado com sucesso!\n\nValor: ${totalFormatado}`);
+                window.location.href = "/sucesso";
+            } else {
+                throw new Error(respostaServidor.erro || "Erro no servidor");
+            }
+        } catch (error) {
+            alert("Erro: " + error.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fab fa-whatsapp"></i> Finalizar Pedido';
+        }
+    }
+
+    // Função para cartão (Mercado Pago) - usa a rota existente /api/criar-pagamento-pix
+    async function processarPagamentoCartao(itens, btn) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        const comprador = {
+            nome: document.getElementById('checkout-nome').value,
+            whatsapp: document.getElementById('checkout-whatsapp').value,
+            email: document.getElementById('checkout-email').value,
+            cep: document.getElementById('checkout-cep').value,
+            endereco: document.getElementById('checkout-rua').value,
+            numero: document.getElementById('checkout-numero').value,
+            complemento: document.getElementById('checkout-complemento').value,
+            horario_entrega: document.getElementById('checkout-horario').value
+        };
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecionando...';
+
+        try {
+            const response = await fetch('/api/criar-pagamento-pix', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    itens: itens,
+                    comprador: comprador,
+                    frete: valorFreteGlobal
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.sucesso) {
+                const totalOriginal = data.total_original.toFixed(2).replace('.', ',');
+                const totalDesconto = data.total_com_desconto.toFixed(2).replace('.', ',');
+
+                if (confirm(`✅ Pagamento via cartão com 5% de desconto!\n\nValor original: R$ ${totalOriginal}\nValor com desconto: R$ ${totalDesconto}\n\nDeseja continuar para o pagamento?`)) {
+                    localStorage.removeItem(getCartKey());
+                    window.location.href = data.init_point;
+                } else {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fab fa-whatsapp"></i> Finalizar Pedido';
+                }
+            } else {
+                alert("Erro ao processar pagamento: " + (data.erro || "Erro desconhecido"));
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fab fa-whatsapp"></i> Finalizar Pedido';
+            }
+        } catch (error) {
+            alert("Erro na comunicação com o servidor: " + error.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fab fa-whatsapp"></i> Finalizar Pedido';
+        }
+    }
+
+    // Nova função para PIX manual (exibe chave)
+    async function processarPagamentoPixManual(itens, btn) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        const comprador = {
+            nome: document.getElementById('checkout-nome').value,
+            whatsapp: document.getElementById('checkout-whatsapp').value,
+            email: document.getElementById('checkout-email').value,
+            cep: document.getElementById('checkout-cep').value,
+            endereco: document.getElementById('checkout-rua').value,
+            numero: document.getElementById('checkout-numero').value,
+            complemento: document.getElementById('checkout-complemento').value,
+            horario_entrega: document.getElementById('checkout-horario').value
+        };
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
+
+        try {
+            const response = await fetch('/api/criar-pedido-pix-manual', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    itens: itens,
+                    comprador: comprador,
+                    frete: valorFreteGlobal
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.sucesso) {
+                // Exibe um alerta simples com a chave (você pode substituir por um modal)
+                alert(`✅ Pedido gerado com 5% de desconto!\n\nChave PIX para pagamento:\n${data.chave_pix}\n\nApós pagar, envie o comprovante no WhatsApp.`);
+                // Opcional: limpar o carrinho? Normalmente não, pois o pedido já foi registrado.
+                // Se quiser limpar, descomente a linha abaixo:
+                // localStorage.removeItem(getCartKey());
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fab fa-whatsapp"></i> Finalizar Pedido';
+            } else {
+                alert("Erro ao processar pagamento: " + (data.erro || "Erro desconhecido"));
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fab fa-whatsapp"></i> Finalizar Pedido';
+            }
+        } catch (error) {
+            alert("Erro na comunicação com o servidor: " + error.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fab fa-whatsapp"></i> Finalizar Pedido';
+        }
+    }
+    document.addEventListener('DOMContentLoaded', inicializarCarrinho);
+</script>
+{% endblock %}

@@ -1,37 +1,153 @@
-<!doctype html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Loja do Anzol</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-  <main class="fullpage">
-    <header class="brand">
-      <h1>Loja do Anzol</h1>
-      <p class="subtitle">Bem-vindo! Como podemos ajudar você hoje?</p>
-    </header>
+{% extends "base.html" %}
 
-    <section class="actions-home">
-      <a href="/catalogo" class="btn-hero secondary-hero">
-        <span>Ver Catálogo</span>
-        <small>Confira nossos melhores produtos</small>
-      </a>
+{% block title %}CNC Imports - Ofertas do Dia{% endblock %}
 
-      <a href="https://wa.me/5512981025592?text=Olá! Vim da página inicial da Loja do Anzol."
-         target="_blank"
-         class="btn-hero btn-especialista">
-        <i class="fab fa-whatsapp" style="font-size: 2rem; margin-bottom: 10px;"></i>
-        <span>Falar com Especialista</span>
-        <small>Tire dúvidas via WhatsApp</small>
-      </a>
+{% block content %}
+<div class="home-wrapper" style="padding-top: 15px;">
+
+    {% if promos %}
+        <!-- Carrossel de Cards -->
+        <div class="swiper cardsSwiper" style="margin: 20px 0; width: 100%;">
+            <div class="swiper-wrapper">
+                <!-- Card 1: Catálogo (azul) -->
+                <div class="swiper-slide">
+                    <a href="{{ url_for('baixar_catalogo') }}" class="info-card card-azul" onclick="return verificarLoginCatalogo(event)">
+                        <i class="fas fa-download"></i>
+                        <h3>Catálogo Completo</h3>
+                        <p>Baixe grátis nosso catálogo técnico.</p>
+                    </a>
+                </div>
+
+                <!-- Card 2: Descontos (laranja) -->
+                <div class="swiper-slide">
+                    <a href="{{ url_for('facilidades_pagamento') }}" class="info-card card-laranja">
+                        <i class="fas fa-tags"></i>
+                        <h3>Descontos</h3>
+                        <p>✅ 5% no PIX | Parcele em 12x</p>
+                    </a>
+                </div>
+
+                <!-- Card 3: Entregas (verde) -->
+                <div class="swiper-slide">
+                    <a href="{{ url_for('fretes_envio') }}" class="info-card card-verde">
+                        <i class="fas fa-truck"></i>
+                        <h3>Entregas</h3>
+                        <p>Correios, transportadoras, motoboy (RMBH) e retirada.</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Paginação (bolinhas) -->
+            <div class="swiper-pagination"></div>
+
+            <!-- Setas de navegação -->
+            <div class="swiper-button-prev" style="color: #e67e22;"></div>
+            <div class="swiper-button-next" style="color: #e67e22;"></div>
+        </div>
+
+        <section class="promo-grid" style="margin-top: 0 !important; padding-top: 0 !important;">
+            {% for produto in promos %}
+            <div class="promo-card">
+                <div class="promo-badge-balao">OFERTA</div>
+
+                <div class="promo-img-container">
+                    <img src="{{ url_for('static', filename='img/produtos/' + produto.imagem) }}"
+                         alt="{{ produto.nome }}"
+                         onerror="this.src='{{ url_for('static', filename='img/produtos/placeholder.jpg') }}'">
+                </div>
+
+                <div class="promo-info">
+                    <span class="promo-name">{{ produto.nome }}</span>
+                    <div class="product-price">
+                        <span class="currency">R$</span>
+                        <span class="price-val">{{ "%.2f"|format(produto.preco)|replace('.', ',') }}</span>
+                        <span class="unit">/{{ produto.unidade }}</span>
+                    </div>
+                    <button type="button" class="btn-buy"
+                            onclick="adicionarAoCarrinho('{{ produto.id }}', '{{ produto.nome }}', '{{ produto.preco }}', '{{ produto.unidade }}')">
+                        <i class="fas fa-cart-plus"></i> Adicionar
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+    {% else %}
+        <div style="text-align: center; padding: 40px; color: #888;">
+            <i class="fas fa-store-slash" style="font-size: 3rem;"></i>
+            <p>As ofertas estão sendo preparadas. Volte em instantes!</p>
+        </div>
+    {% endif %}
+
+    <h2 class="section-title" style="margin-top: 10px;"><i class="fas fa-th-large"></i> Navegue por Categoria</h2>
+
+    <section class="category-grid">
+        <a href="{{ url_for('catalogo', cat='fresas') }}" class="cat-card">
+            <div class="cat-icon"><i class="fas fa-cogs"></i></div>
+            <span>Fresas</span>
+        </a>
+        <a href="{{ url_for('catalogo', cat='ferramentas') }}" class="cat-card">
+            <div class="cat-icon"><i class="fas fa-tools"></i></div>
+            <span>Ferramentas</span>
+        </a>
+        <a href="{{ url_for('catalogo', cat='plasticos') }}" class="cat-card">
+            <div class="cat-icon"><i class="fas fa-trash-alt"></i></div>
+            <span>Plásticos e Descartáveis</span>
+        </a>
+        <a href="{{ url_for('catalogo', cat='brinquedos') }}" class="cat-card">
+            <div class="cat-icon"><i class="fas fa-gamepad"></i></div>
+            <span>Brinquedos</span>
+        </a>
     </section>
+</div>
+{% endblock %}
 
-    <footer class="footer">
-      <small>© 2026 — Projeto Loja do Anzol</small>
-    </footer>
-  </main>
-</body>
-</html>
+{% block scripts %}
+<script>
+    // Função para verificar login antes de baixar o catálogo
+    function verificarLoginCatalogo(event) {
+        {% if not session.get('user') %}
+            event.preventDefault();
+            if (typeof abrirModalAuth === 'function') {
+                abrirModalAuth();
+            } else {
+                alert('Por favor, faça login ou cadastre-se para baixar o catálogo.');
+            }
+            return false;
+        {% endif %}
+        return true;
+    }
+
+    // Inicializar o Swiper após o carregamento da página
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Swiper !== 'undefined') {
+            new Swiper(".cardsSwiper", {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                loop: true,
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+                pagination: {
+                    el: ".swiper-pagination",
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: ".swiper-button-next",
+                    prevEl: ".swiper-button-prev",
+                },
+                breakpoints: {
+                    640: {
+                        slidesPerView: 2,
+                    },
+                    1024: {
+                        slidesPerView: 3,
+                    },
+                }
+            });
+        } else {
+            console.error('Swiper não carregado. Verifique a inclusão da biblioteca no base.html');
+        }
+    });
+</script>
+{% endblock %}

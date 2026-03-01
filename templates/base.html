@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}CNC Imports{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <div id="overlay-menu" class="overlay" onclick="toggleMenu()"></div>
+
+    <!-- Linha superior do WhatsApp -->
+    <div class="whatsapp-top-bar">
+        <div class="container">
+            <i class="fab fa-whatsapp"></i> Se preferir comprar diretamente pelo WhatsApp ou tiver qualquer dúvida, entre em contato:
+            <a href="https://wa.me/5512981025592" target="_blank"><strong>(12) 98102-5592</strong></a>
+        </div>
+    </div>
+
+    <div id="sidebar-menu" class="sidebar">
+        <div class="sidebar-header">
+            <span><i class="fas fa-cubes"></i> CNC Imports</span>
+            <button onclick="toggleMenu()">&times;</button>
+        </div>
+        <div class="sidebar-content">
+            <h3>Navegar por Categorias</h3>
+            <a href="{{ url_for('home') }}" onclick="toggleMenu()"><i class="fas fa-fire" style="color: #e74c3c;"></i> Ofertas do Dia</a>
+            <a href="{{ url_for('catalogo', cat='fresas') }}" onclick="toggleMenu()"><i class="fas fa-cogs" style="color: #e67e22;"></i> Fresas</a>
+            <a href="{{ url_for('catalogo', cat='ferramentas') }}" onclick="toggleMenu()"><i class="fas fa-tools" style="color: #3498db;"></i> Ferramentas</a>
+            <a href="{{ url_for('catalogo', cat='plasticos') }}" onclick="toggleMenu()"><i class="fas fa-trash-alt" style="color: #27ae60;"></i> Plásticos e Descartáveis</a>
+            <a href="{{ url_for('catalogo', cat='brinquedos') }}" onclick="toggleMenu()"><i class="fas fa-gamepad" style="color: #f1c40f;"></i> Brinquedos</a>
+            <hr>
+            <a href="{{ url_for('catalogo') }}" onclick="toggleMenu()"><i class="fas fa-list-ul"></i> Ver Todos os Produtos</a>
+        </div>
+    </div>
+
+    <header class="main-header">
+        <div class="nav-top">
+            <div class="nav-container">
+                <a href="{{ url_for('home') }}" class="logo-brand">
+                    <i class="fas fa-cubes"></i> CNC Imports
+                </a>
+
+                <div class="nav-location" onclick="abrirModalAuth()">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div style="display:flex; flex-direction:column; line-height:1.1;">
+                        <span style="font-size:0.7rem; opacity:0.8;">Entregar em:</span>
+                        <strong id="cep-header-display" style="font-size:0.85rem;">
+                            {% if session.get('user') %}
+                                {{ session['user']['cep'] }}
+                            {% else %}
+                                Informe seu CEP
+                            {% endif %}
+                        </strong>
+                    </div>
+                </div>
+
+                <form action="{{ url_for('catalogo') }}" method="GET" class="search-box">
+                    <input type="text" name="busca" placeholder="Buscar fresas, ferramentas...">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+
+                <div class="user-actions">
+                    {% if session.get('user') %}
+                        <div class="login-link">
+                            <span>Olá, {{ session['user']['nome'].split(' ')[0] }}</span>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <a href="{{ url_for('logout') }}" style="color: #ffcccc; font-size: 0.75rem; font-weight: 600; text-decoration: underline;">Sair</a>
+                                {% if session['user']['email'] == 'wendreis@yahoo.com.br' %}
+                                    <a href="{{ url_for('admin_painel') }}" style="background: #ffeb3b; color: #333; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; text-decoration: none;">ADMIN</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="javascript:void(0)" class="login-link" onclick="abrirModalAuth()">
+                            <span>Olá, Visitante</span>
+                            <strong>Entrar / Cadastrar</strong>
+                        </a>
+                    {% endif %}
+
+                    <a href="javascript:void(0)" class="cart-icon-box" onclick="abrirModalCarrinho()">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-badge" id="cart-count">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-bottom">
+            <div class="nav-links-row">
+                <a href="javascript:void(0)" class="all-categories-btn" onclick="toggleMenu()">
+                    <i class="fas fa-bars"></i> Categorias
+                </a>
+                <a href="{{ url_for('home') }}" class="nav-item">Início</a>
+                <a href="{{ url_for('home') }}" class="nav-item destaque">Ofertas</a>
+                <a href="{{ url_for('catalogo', cat='fresas') }}" class="nav-item">Fresas</a>
+                <a href="{{ url_for('catalogo', cat='ferramentas') }}" class="nav-item">Ferramentas</a>
+                <a href="{{ url_for('catalogo', cat='plasticos') }}" class="nav-item">Plásticos</a>
+                <a href="{{ url_for('catalogo', cat='brinquedos') }}" class="nav-item">Brinquedos</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-col logo-col">
+                        <div class="footer-logo">
+                            <i class="fas fa-cubes"></i> CNC Imports
+                        </div>
+                    </div>
+                    <div class="footer-col">
+                        <h4>CNC IMPORTS</h4>
+                        <ul>
+                            <li><a href="{{ url_for('sobre') }}">Sobre a Empresa</a></li>
+                            <li><a href="{{ url_for('como_comprar') }}">Como Comprar</a></li>
+                            <li><a href="{{ url_for('politica_seguranca') }}">Política de Segurança</a></li>
+                            <li><a href="{{ url_for('fretes_envio') }}">Fretes e Envio</a></li>
+                            <li><a href="{{ url_for('facilidades_pagamento') }}">Facilidades de Pagamento</a></li>
+                            <li><a href="{{ url_for('garantia') }}">Garantia</a></li>
+                            <li><a href="{{ url_for('trocas_devolucoes') }}">Trocas e Devoluções</a></li>
+                            <li><a href="{{ url_for('fale_conosco') }}">Fale Conosco</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>CONTATO</h4>
+                        <ul>
+                            <li><i class="fas fa-clock"></i> Segunda a Sexta de 8 às 18h</li>
+                            <li><i class="fab fa-whatsapp"></i> <a href="https://wa.me/5512981025592">(12) 98102-5592</a></li>
+                            <li><i class="fas fa-envelope"></i> <a href="mailto:wendreis@yahoo.com.br">wendreis@yahoo.com.br</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>PAGAMENTO</h4>
+                        <div class="payment-icons">
+                            <i class="fas fa-credit-card" title="Mercado Pago"></i>
+                            <i class="fas fa-qrcode" title="PIX"></i>
+                            <i class="fas fa-barcode" title="Boleto"></i>
+                        </div>
+                    </div>
+                    <div class="footer-col">
+                        <h4>SEGURANÇA</h4>
+                        <div class="security-icons">
+                            <i class="fas fa-shield-alt" title="Google Safe Browsing"></i>
+                            <i class="fas fa-lock" title="Loja Protegida"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>copyrights 2025, CNC Imports, Contagem/MG - Todos os Direitos Reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="modal-auth" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <span style="float:right; cursor:pointer; font-size:1.5rem;" onclick="fecharModalAuth()">&times;</span>
+            <div id="auth-login">
+                <h3 style="color: var(--verde-topo); margin-bottom: 20px;"><i class="fas fa-user-circle"></i> Entrar</h3>
+                <input type="email" id="login-email" placeholder="Seu e-mail" class="input-auth">
+                <input type="password" id="login-senha" placeholder="Sua senha" class="input-auth">
+                <button onclick="fazerLogin()" class="btn-buy" style="margin-top:10px;">Entrar</button>
+                <p style="margin-top:15px; font-size:0.85rem;">Não tem conta? <a href="#" onclick="alternarAuth('cadastro')" style="color:var(--verde-topo); font-weight:700;">Cadastre-se</a></p>
+            </div>
+            <div id="auth-cadastro" style="display:none;">
+                <h3 style="color: var(--verde-topo); margin-bottom: 20px;"><i class="fas fa-user-plus"></i> Criar Conta</h3>
+                <input type="text" id="cad-nome" placeholder="Nome Completo" class="input-auth">
+                <input type="text" id="cad-cep" placeholder="CEP (apenas números)" class="input-auth" onblur="buscarCEPCadastro()">
+                <input type="text" id="cad-endereco" placeholder="Endereço" class="input-auth" disabled>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="cad-numero" placeholder="Nº" class="input-auth" style="flex: 1;">
+                    <input type="text" id="cad-complemento" placeholder="Comp. (Opcional)" class="input-auth" style="flex: 2;">
+                </div>
+                <input type="text" id="cad-telefone" placeholder="WhatsApp" class="input-auth">
+                <input type="email" id="cad-email" placeholder="E-mail" class="input-auth">
+                <input type="password" id="cad-senha" placeholder="Crie uma senha" class="input-auth">
+                <button onclick="fazerCadastro()" class="btn-buy" style="margin-top:10px;">Finalizar Cadastro</button>
+                <p style="margin-top:15px; font-size:0.85rem;">Já tem conta? <a href="#" onclick="alternarAuth('login')" style="color:var(--verde-topo); font-weight:700;">Fazer Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-carrinho" class="modal">
+        <div class="modal-content">
+            <span style="float:right; cursor:pointer; font-size:1.5rem;" onclick="fecharModalCarrinho()">&times;</span>
+            <h3 style="color: var(--verde-topo);"><i class="fas fa-shopping-cart"></i> Seu Carrinho</h3>
+            <div id="itens-carrinho" style="margin: 20px 0; max-height: 350px; overflow-y: auto; padding-right: 5px;"></div>
+            <div class="cart-footer">
+                <div class="cart-total-box" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-top: 1px dashed #ccc; padding-top:15px;">
+                    <span style="font-weight:600; color:#666;">Total em Produtos</span>
+                    <span style="font-size:1.6rem; font-weight:800; color:var(--texto-dark);">R$ <span id="total-carrinho">0,00</span></span>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="fecharModalCarrinho()" class="btn-buy" style="background:#eee; color:#555; box-shadow:none;">Continuar</button>
+                    <button onclick="irParaCheckout()" class="btn-buy">Finalizar Pedido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-qtd" class="modal">
+        <div class="modal-content modal-quantidade" style="max-width: 400px;">
+            <h3 id="modal-nome-prod"></h3>
+            <p>Selecione a quantidade em <span id="modal-unidade" style="font-weight: bold; color: var(--verde-topo);"></span></p>
+            <div class="input-group-quantidade">
+                <button class="btn-qtd" onclick="alterarQtd(-1)">-</button>
+                <input type="number" id="input-modal-qtd" step="0.1" value="1" min="0.1">
+                <button class="btn-qtd" onclick="alterarQtd(1)">+</button>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button onclick="fecharModalQtd()" style="flex:1; background:#eee; border:none; border-radius:12px; cursor:pointer; font-weight:600; padding: 12px;">Voltar</button>
+                <button onclick="confirmarAdicao()" class="btn-buy" style="flex:2;">Adicionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão Flutuante do WhatsApp -->
+    <a href="https://wa.me/5512981025592?text=Olá!%20Vim%20pelo%20site%20CNC%20Imports%20e%20gostaria%20de%20mais%20informações."
+       class="whatsapp-float"
+       target="_blank"
+       title="Compre pelo WhatsApp">
+       <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script>
+        // --- LÓGICA DE ISOLAMENTO DO CARRINHO ---
+        function getCartKey() {
+            const userEmail = "{{ session.get('user', {}).get('email', 'visitante') }}";
+            return 'cnc_cart_' + userEmail;
+        }
+
+        let carrinho = JSON.parse(localStorage.getItem(getCartKey())) || [];
+        let itemPendente = null;
+
+        window.onload = () => { atualizarContador(); };
+
+        function toggleMenu() {
+            document.getElementById('sidebar-menu').classList.toggle('active');
+            document.getElementById('overlay-menu').classList.toggle('active');
+        }
+
+        function abrirModalAuth() { document.getElementById('modal-auth').style.display = 'flex'; }
+        function fecharModalAuth() { document.getElementById('modal-auth').style.display = 'none'; }
+        function alternarAuth(tipo) {
+            document.getElementById('auth-login').style.display = tipo === 'login' ? 'block' : 'none';
+            document.getElementById('auth-cadastro').style.display = tipo === 'cadastro' ? 'block' : 'none';
+        }
+
+        async function buscarCEPCadastro() {
+            let cep = document.getElementById('cad-cep').value.replace(/\D/g, '');
+            if(cep.length === 8) {
+                const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await res.json();
+                if(!data.erro) {
+                    document.getElementById('cad-endereco').value = `${data.logradouro}, ${data.bairro}`;
+                } else { alert("CEP não encontrado."); }
+            }
+        }
+
+        async function fazerLogin() {
+            const email = document.getElementById('login-email').value;
+            const senha = document.getElementById('login-senha').value;
+            if (!email || !senha) return alert("Preencha tudo!");
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ email, senha })
+            });
+            if (response.ok) { location.reload(); } else { alert("Erro no login"); }
+        }
+
+        async function fazerCadastro() {
+            const dados = {
+                nome: document.getElementById('cad-nome').value,
+                cep: document.getElementById('cad-cep').value,
+                endereco: document.getElementById('cad-endereco').value,
+                numero: document.getElementById('cad-numero').value,
+                complemento: document.getElementById('cad-complemento').value,
+                telefone: document.getElementById('cad-telefone').value,
+                email: document.getElementById('cad-email').value,
+                senha: document.getElementById('cad-senha').value
+            };
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const res = await fetch('/api/cadastro', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(dados)
+            });
+            const resposta = await res.json();
+            if (res.ok) {
+                location.reload();
+            } else {
+                // Se a mensagem indicar e-mail já cadastrado
+                if (resposta.mensagem && resposta.mensagem.includes('E-mail já cadastrado')) {
+                    alert('Este e-mail já está cadastrado. Vamos fazer login?');
+                    // Alterna para a tela de login
+                    alternarAuth('login');
+                    // Preenche o e-mail no campo de login
+                    document.getElementById('login-email').value = dados.email;
+                    // Foca no campo de senha para agilizar
+                    document.getElementById('login-senha').focus();
+                } else {
+                    alert('Erro no cadastro: ' + (resposta.mensagem || 'Tente novamente.'));
+                }
+            }
+        }
+
+        function atualizarContador() {
+            document.getElementById('cart-count').innerText = carrinho.length;
+        }
+
+        function adicionarAoCarrinho(id, nome, preco, unidade) {
+            itemPendente = { id, nome, preco: parseFloat(preco), unidade };
+            document.getElementById('modal-nome-prod').innerText = nome;
+            document.getElementById('modal-unidade').innerText = unidade;
+            document.getElementById('input-modal-qtd').value = (unidade === 'kg' ? "1.0" : "1");
+            document.getElementById('modal-qtd').style.display = 'flex';
+        }
+
+        function alterarQtd(v) {
+            let inp = document.getElementById('input-modal-qtd');
+            let passo = (itemPendente.unidade === 'kg') ? 0.1 : 1;
+            let novoValor = parseFloat(inp.value) + (v * passo);
+            if (novoValor < passo) novoValor = passo;
+            inp.value = (itemPendente.unidade === 'kg') ? novoValor.toFixed(1) : Math.round(novoValor);
+        }
+
+        function fecharModalQtd() { document.getElementById('modal-qtd').style.display = 'none'; }
+
+        function confirmarAdicao() {
+            const qtd = parseFloat(document.getElementById('input-modal-qtd').value);
+            carrinho.push({...itemPendente, quantidade: qtd});
+            localStorage.setItem(getCartKey(), JSON.stringify(carrinho));
+            atualizarContador();
+            fecharModalQtd();
+        }
+
+        function abrirModalCarrinho() {
+            const container = document.getElementById('itens-carrinho');
+            const totalSpan = document.getElementById('total-carrinho');
+            container.innerHTML = "";
+            let total = 0;
+            if (carrinho.length === 0) {
+                container.innerHTML = `<p style="text-align:center; color:#aaa;">Carrinho Vazio</p>`;
+            } else {
+                carrinho.forEach((item, index) => {
+                    let sub = item.preco * item.quantidade;
+                    total += sub;
+                    container.innerHTML += `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px; padding:10px; background:#f9f9f9; border-radius:8px;">
+                            <span>${item.nome} (${item.quantidade}${item.unidade})</span>
+                            <span>R$ ${sub.toFixed(2)} <i class="fas fa-trash" onclick="removerItem(${index})" style="color:red; cursor:pointer; margin-left:10px;"></i></span>
+                        </div>`;
+                });
+            }
+            totalSpan.innerText = total.toFixed(2).replace('.', ',');
+            document.getElementById('modal-carrinho').style.display = 'flex';
+        }
+
+        function removerItem(index) {
+            carrinho.splice(index, 1);
+            localStorage.setItem(getCartKey(), JSON.stringify(carrinho));
+            atualizarContador();
+            abrirModalCarrinho();
+        }
+
+        function fecharModalCarrinho() { document.getElementById('modal-carrinho').style.display = 'none'; }
+        function irParaCheckout() { window.location.href = '/carrinho'; }
+
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                fecharModalAuth(); fecharModalCarrinho(); fecharModalQtd();
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Pedido Confirmado - CNC Imports{% endblock %}
+
+{% block content %}
+<div class="sucesso-container" style="text-align: center; padding: 60px 20px; max-width: 600px; margin: 0 auto;">
+
+    <div class="sucesso-icon" style="font-size: 5rem; color: #2ecc71; margin-bottom: 20px;">
+        <i class="fas fa-check-circle"></i>
+    </div>
+
+    <h1 style="color: #2c3e50; margin-bottom: 10px;">Pedido Recebido com Sucesso!</h1>
+    <p style="font-size: 1.1rem; color: #7f8c8d; margin-bottom: 30px;">
+        Obrigado por escolher a <strong>CNC Imports</strong>. Suas ferramentas e fresas serão separadas com todo cuidado e entregues em breve!
+    </p>
+
+    <div class="acoes-sucesso" style="display: flex; flex-direction: column; gap: 15px;">
+        <a href="https://wa.me/SEU_NUMERO_AQUI" target="_blank" class="btn-buy" style="background: #25d366; text-decoration: none; padding: 15px;">
+            <i class="fab fa-whatsapp"></i> Acompanhar pelo WhatsApp
+        </a>
+        
+        <a href="{{ url_for('home') }}" style="color: #3498db; text-decoration: none; font-weight: 600;">
+            <i class="fas fa-arrow-left"></i> Voltar para o Início
+        </a>
+    </div>
+</div>
+{% endblock %}

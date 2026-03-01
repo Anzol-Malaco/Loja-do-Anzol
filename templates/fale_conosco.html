@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Fale Conosco - CNC Imports{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 20px; max-width: 800px;">
+    <h1 style="color: #e67e22; margin-bottom: 30px;">Fale Conosco</h1>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+        <!-- Informações de contato -->
+        <div>
+            <h3 style="color: #2c3e50; margin-bottom: 15px;">Informações para Contato</h3>
+            <p><i class="fas fa-phone" style="color: #e67e22; margin-right: 10px;"></i> <strong>Telefone/WhatsApp:</strong> <a href="https://wa.me/5512981025592">(12) 98102-5592</a></p>
+            <p><i class="fas fa-envelope" style="color: #e67e22; margin-right: 10px;"></i> <strong>E-mail:</strong> <a href="mailto:wendreis@yahoo.com.br">wendreis@yahoo.com.br</a></p>
+            <p><i class="fas fa-map-marker-alt" style="color: #e67e22; margin-right: 10px;"></i> <strong>Endereço:</strong> Rua Mariano de Oliveira, 102 - Novo Progresso - Contagem/MG</p>
+            
+            <h3 style="color: #2c3e50; margin: 30px 0 15px;">Horário de Atendimento</h3>
+            <p>Segunda a Sexta: 08:00 às 18:00</p>
+        </div>
+        
+        <!-- Formulário de contato -->
+        <div>
+            <h3 style="color: #2c3e50; margin-bottom: 15px;">Envie uma mensagem</h3>
+            <form id="form-contato" method="POST" action="{{ url_for('enviar_contato') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="form-group">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" name="nome" class="input-auth" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" class="input-auth" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="telefone">Telefone (opcional)</label>
+                    <input type="text" id="telefone" name="telefone" class="input-auth">
+                </div>
+                
+                <div class="form-group">
+                    <label for="mensagem">Mensagem</label>
+                    <textarea id="mensagem" name="mensagem" class="input-auth" rows="5" required style="resize: vertical;"></textarea>
+                </div>
+                
+                <button type="submit" class="btn-buy" style="width: 100%; margin-top: 10px;">Enviar Mensagem</button>
+            </form>
+            <div id="mensagem-status" style="margin-top: 15px; text-align: center;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('form-contato').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    const response = await fetch(this.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken
+        },
+        body: formData
+    });
+    
+    const result = await response.json();
+    const statusDiv = document.getElementById('mensagem-status');
+    
+    if (response.ok) {
+        statusDiv.innerHTML = '<p style="color: green;">Mensagem enviada com sucesso! Entraremos em contato em breve.</p>';
+        this.reset();
+    } else {
+        statusDiv.innerHTML = '<p style="color: red;">Erro ao enviar mensagem. Tente novamente mais tarde.</p>';
+    }
+});
+</script>
+{% endblock %}

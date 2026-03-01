@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Pagamento Confirmado - CNC Imports{% endblock %}
+
+{% block content %}
+<div class="sucesso-container" style="text-align: center; padding: 60px 20px; max-width: 600px; margin: 0 auto;">
+    
+    <div class="sucesso-icon" style="font-size: 5rem; color: #2ecc71; margin-bottom: 20px;">
+        <i class="fas fa-check-circle"></i>
+    </div>
+
+    <h1 style="color: #2c3e50; margin-bottom: 10px;">Pagamento Confirmado!</h1>
+    <p style="font-size: 1.1rem; color: #7f8c8d; margin-bottom: 30px;">
+        Seu pagamento via PIX foi processado com sucesso. O pedido <strong>#{{ pedido.id if pedido else '' }}</strong> já está em separação!
+    </p>
+
+    <div class="aviso-pix" style="background: #e8f5e9; border-left: 5px solid #4caf50; padding: 20px; text-align: left; border-radius: 8px; margin-bottom: 30px;">
+        <h4 style="color: #2e7d32; margin-bottom: 8px;">
+            <i class="fas fa-check-circle"></i> Benefícios do PIX:
+        </h4>
+        <ul style="color: #2e7d32; font-size: 0.95rem; line-height: 1.5; padding-left: 20px;">
+            <li>✅ 5% de desconto no valor total</li>
+            <li>✅ Confirmação imediata do pagamento</li>
+            <li>✅ Entrega mais rápida</li>
+        </ul>
+    </div>
+
+    <div class="acoes-sucesso" style="display: flex; flex-direction: column; gap: 15px;">
+        <a href="https://wa.me/5512981025592" target="_blank" class="btn-buy" style="background: #25d366; text-decoration: none; padding: 15px;">
+            <i class="fab fa-whatsapp"></i> Acompanhar pelo WhatsApp
+        </a>
+        
+        <a href="{{ url_for('home') }}" style="color: #3498db; text-decoration: none; font-weight: 600;">
+            <i class="fas fa-arrow-left"></i> Voltar para o Início
+        </a>
+    </div>
+</div>
+{% endblock %}
