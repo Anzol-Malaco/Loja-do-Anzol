@@ -962,3 +962,129 @@ a {
         font-size: 1.7rem;
     }
 }
+/* Hover na navbar inferior */
+.nav-item {
+    transition: color 0.2s ease;
+}
+
+.nav-item:hover {
+    color: var(--cor-primaria); /* laranja industrial */
+}
+
+.all-categories-btn {
+    transition: color 0.2s ease;
+}
+
+.all-categories-btn:hover {
+    color: var(--cor-escura) !important; /* cinza escuro para contraste, ou pode ser um laranja mais escuro */
+}
+/* Footer links - hover com sublinhado */
+.footer-col ul li a {
+    position: relative;
+    display: inline-block;
+    transition: color 0.2s ease;
+}
+
+.footer-col ul li a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--cor-secundaria); /* laranja claro */
+    transition: width 0.3s ease;
+}
+
+.footer-col ul li a:hover {
+    color: var(--cor-secundaria);
+}
+
+.footer-col ul li a:hover::after {
+    width: 100%;
+}
+/* ============================================================
+   6. CATEGORIAS NA HOME (CARDS)
+   ============================================================ */
+.category-grid {
+    display: grid;
+    gap: 20px;
+    margin: 30px 0;
+    padding: 0 10px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Para telas grandes (≥1024px) - 6 colunas */
+@media (min-width: 1024px) {
+    .category-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+/* Para tablets (entre 768px e 1023px) - 3 colunas */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .category-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Para celulares (≤767px) - 2 colunas */
+@media (max-width: 767px) {
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.cat-card {
+    background: var(--branco);
+    border-radius: var(--radius-m);
+    padding: 20px 10px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--texto-dark);
+    box-shadow: var(--sombra);
+    transition: var(--transicao);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #eee;
+}
+
+.cat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--sombra-viva);
+    border-color: var(--cor-primaria);
+    background: #fff9f0;
+}
+
+.cat-card:hover .cat-icon {
+    background: var(--cor-primaria);
+    color: white;
+    transform: scale(1.05);
+}
+
+.cat-card:hover span {
+    color: var(--cor-primaria);
+}
+
+.cat-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(211,84,0,0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--cor-primaria);
+    transition: all 0.3s ease;
+}
+
+.cat-card span {
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+}

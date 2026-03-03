@@ -476,7 +476,6 @@ def processar_pedido():
             numero=dados['numero'],
             complemento=dados.get('complemento', ''),
             pagamento=dados['pagamento'],
-            horario_entrega=dados['horario_entrega'],
             subtotal=subtotal,
             frete=frete,
             total=total,
@@ -957,24 +956,15 @@ def api_atualizar_precos():
 
 
 # ============================================================
-# INICIALIZAÇÃO PARA PRODUÇÃO (RENDER/GUNICORN)
+# INICIALIZAÇÃO
 # ============================================================
-# Criamos um bloco fora do "if __name__" para o Render executar sempre
-with app.app_context():
-    db.create_all()
-    # Cria índices para melhor performance
-    try:
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+        # Cria índices para melhor performance
         db.session.execute(text('CREATE INDEX IF NOT EXISTS idx_produto_disponivel ON produto (disponivel)'))
         db.session.execute(text('CREATE INDEX IF NOT EXISTS idx_produto_categoria ON produto (categoria)'))
         db.session.execute(text('CREATE INDEX IF NOT EXISTS idx_produto_nome ON produto (nome)'))
         db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        print(f"Aviso nos índices: {e}")
-    
-    # CARGA VITAL: Lê o produtos.xlsx e preenche o PostgreSQL
     sincronizar_tudo_do_excel()
-
-# O bloco abaixo só roda no seu computador (PyCharm/VSCode)
-if __name__ == "__main__":
     app.run(debug=False)

@@ -49,23 +49,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Melhor Horário para Entrega</label>
-                    <select id="checkout-horario">
-                        <option value="" disabled selected>Selecione um período</option>
-                        <option value="Manhã (08h às 12h)">Manhã (08h às 12h)</option>
-                        <option value="Tarde (13h às 18h)">Tarde (13h às 18h)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
                     <label>Forma de Pagamento</label>
                     <select id="checkout-pagamento">
                         <option value="entrega" selected>Pagamento na Entrega</option>
-                        <option value="pix_manual">PIX (5% de desconto)</option>
+                        <option value="pix_manual">PIX (5% de desconto) – Chave manual</option>
                         <option value="cartao">Cartão (Mercado Pago)</option>
                     </select>
                 </div>
-
             </form>
         </div>
 
@@ -108,20 +98,19 @@
 </div>
 
 <script>
-    // Função para obter a chave do carrinho no localStorage (definida no base.html, mas redefinimos para garantir)
+    // Função para obter a chave do carrinho no localStorage
     function getCartKey() {
         const userEmail = "{{ session.get('user', {}).get('email', 'visitante') }}";
         return 'cnc_cart_' + userEmail;
     }
 
-    // Usa a variável global carrinho (declarada no base.html) - não redeclarar com let
+    // Usa a variável global carrinho (declarada no base.html)
     carrinho = JSON.parse(localStorage.getItem(getCartKey())) || [];
     const userSession = {{ user | tojson if user else 'null' }};
     let configsLoja = {};
     let valorFreteGlobal = 0;
 
     async function inicializarCarrinho() {
-        // Atualiza o carrinho a partir do localStorage
         carrinho = JSON.parse(localStorage.getItem(getCartKey())) || [];
 
         if (carrinho.length === 0) {
@@ -266,7 +255,7 @@
             return;
         }
 
-        const campos = ['checkout-nome', 'checkout-whatsapp', 'checkout-cep', 'checkout-numero', 'checkout-horario'];
+        const campos = ['checkout-nome', 'checkout-whatsapp', 'checkout-cep', 'checkout-numero'];
         for (let id of campos) {
             const input = document.getElementById(id);
             if (!input || !input.value.trim()) {
@@ -288,7 +277,6 @@
         }
     }
 
-    // Função para pagamento na entrega (já existente, mas ajustada para receber btn)
     async function processarPagamentoEntrega(itens, btn) {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
@@ -304,7 +292,6 @@
             numero: document.getElementById('checkout-numero').value,
             complemento: document.getElementById('checkout-complemento').value,
             pagamento: document.getElementById('checkout-pagamento').value,
-            horario_entrega: document.getElementById('checkout-horario').value,
             itens: itens.map(item => ({ id: item.id, quantidade: item.quantidade }))
         };
 
@@ -335,7 +322,6 @@
         }
     }
 
-    // Função para cartão (Mercado Pago) - usa a rota existente /api/criar-pagamento-pix
     async function processarPagamentoCartao(itens, btn) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -346,8 +332,7 @@
             cep: document.getElementById('checkout-cep').value,
             endereco: document.getElementById('checkout-rua').value,
             numero: document.getElementById('checkout-numero').value,
-            complemento: document.getElementById('checkout-complemento').value,
-            horario_entrega: document.getElementById('checkout-horario').value
+            complemento: document.getElementById('checkout-complemento').value
         };
 
         btn.disabled = true;
@@ -392,7 +377,6 @@
         }
     }
 
-    // Nova função para PIX manual (exibe chave)
     async function processarPagamentoPixManual(itens, btn) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -403,8 +387,7 @@
             cep: document.getElementById('checkout-cep').value,
             endereco: document.getElementById('checkout-rua').value,
             numero: document.getElementById('checkout-numero').value,
-            complemento: document.getElementById('checkout-complemento').value,
-            horario_entrega: document.getElementById('checkout-horario').value
+            complemento: document.getElementById('checkout-complemento').value
         };
 
         btn.disabled = true;
@@ -427,11 +410,7 @@
             const data = await response.json();
 
             if (data.sucesso) {
-                // Exibe um alerta simples com a chave (você pode substituir por um modal)
                 alert(`✅ Pedido gerado com 5% de desconto!\n\nChave PIX para pagamento:\n${data.chave_pix}\n\nApós pagar, envie o comprovante no WhatsApp.`);
-                // Opcional: limpar o carrinho? Normalmente não, pois o pedido já foi registrado.
-                // Se quiser limpar, descomente a linha abaixo:
-                // localStorage.removeItem(getCartKey());
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fab fa-whatsapp"></i> Finalizar Pedido';
             } else {
@@ -445,6 +424,7 @@
             btn.innerHTML = '<i class="fab fa-whatsapp"></i> Finalizar Pedido';
         }
     }
+
     document.addEventListener('DOMContentLoaded', inicializarCarrinho);
 </script>
 {% endblock %}

@@ -29,11 +29,12 @@
         </div>
         <div class="sidebar-content">
             <h3>Navegar por Categorias</h3>
-            <a href="{{ url_for('home') }}" onclick="toggleMenu()"><i class="fas fa-fire" style="color: #e74c3c;"></i> Ofertas do Dia</a>
-            <a href="{{ url_for('catalogo', cat='fresas') }}" onclick="toggleMenu()"><i class="fas fa-cogs" style="color: #e67e22;"></i> Fresas</a>
+            <a href="{{ url_for('catalogo', cat='fresas') }}" onclick="toggleMenu()"><i class="fas fa-cogs" style="color: #e67e22;"></i> Fresas e CNC</a>
+            <a href="{{ url_for('catalogo', cat='3d') }}" onclick="toggleMenu()"><i class="fas fa-cube" style="color: #3498db;"></i> 3D Printer</a>
             <a href="{{ url_for('catalogo', cat='ferramentas') }}" onclick="toggleMenu()"><i class="fas fa-tools" style="color: #3498db;"></i> Ferramentas</a>
-            <a href="{{ url_for('catalogo', cat='plasticos') }}" onclick="toggleMenu()"><i class="fas fa-trash-alt" style="color: #27ae60;"></i> Plásticos e Descartáveis</a>
-            <a href="{{ url_for('catalogo', cat='brinquedos') }}" onclick="toggleMenu()"><i class="fas fa-gamepad" style="color: #f1c40f;"></i> Brinquedos</a>
+            <a href="{{ url_for('catalogo', cat='plasticos') }}" onclick="toggleMenu()"><i class="fas fa-trash-alt" style="color: #27ae60;"></i> Plásticos</a>
+            <a href="{{ url_for('catalogo', cat='descartaveis') }}" onclick="toggleMenu()"><i class="fas fa-box-open" style="color: #e67e22;"></i> Descartáveis</a>
+            <a href="{{ url_for('catalogo', cat='hobbies') }}" onclick="toggleMenu()"><i class="fas fa-gamepad" style="color: #f1c40f;"></i> Hobbies</a>
             <hr>
             <a href="{{ url_for('catalogo') }}" onclick="toggleMenu()"><i class="fas fa-list-ul"></i> Ver Todos os Produtos</a>
         </div>
@@ -91,19 +92,19 @@
             </div>
         </div>
 
-        <div class="nav-bottom">
-            <div class="nav-links-row">
-                <a href="javascript:void(0)" class="all-categories-btn" onclick="toggleMenu()">
-                    <i class="fas fa-bars"></i> Categorias
-                </a>
-                <a href="{{ url_for('home') }}" class="nav-item">Início</a>
-                <a href="{{ url_for('home') }}" class="nav-item destaque">Ofertas</a>
-                <a href="{{ url_for('catalogo', cat='fresas') }}" class="nav-item">Fresas</a>
-                <a href="{{ url_for('catalogo', cat='ferramentas') }}" class="nav-item">Ferramentas</a>
-                <a href="{{ url_for('catalogo', cat='plasticos') }}" class="nav-item">Plásticos</a>
-                <a href="{{ url_for('catalogo', cat='brinquedos') }}" class="nav-item">Brinquedos</a>
-            </div>
+    <div class="nav-bottom">
+        <div class="nav-links-row">
+            <a href="javascript:void(0)" class="all-categories-btn" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i> Categorias
+            </a>
+            <a href="{{ url_for('catalogo', cat='fresas') }}" class="nav-item">Fresas e CNC</a>
+            <a href="{{ url_for('catalogo', cat='3d') }}" class="nav-item">3D Printer</a>
+            <a href="{{ url_for('catalogo', cat='ferramentas') }}" class="nav-item">Ferramentas</a>
+            <a href="{{ url_for('catalogo', cat='plasticos') }}" class="nav-item">Plásticos</a>
+            <a href="{{ url_for('catalogo', cat='descartaveis') }}" class="nav-item">Descartáveis</a>
+            <a href="{{ url_for('catalogo', cat='hobbies') }}" class="nav-item">Hobbies</a>
         </div>
+    </div>
     </header>
 
     <main class="container">

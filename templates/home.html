@@ -80,24 +80,32 @@
 
     <h2 class="section-title" style="margin-top: 10px;"><i class="fas fa-th-large"></i> Navegue por Categoria</h2>
 
-    <section class="category-grid">
-        <a href="{{ url_for('catalogo', cat='fresas') }}" class="cat-card">
-            <div class="cat-icon"><i class="fas fa-cogs"></i></div>
-            <span>Fresas</span>
-        </a>
-        <a href="{{ url_for('catalogo', cat='ferramentas') }}" class="cat-card">
-            <div class="cat-icon"><i class="fas fa-tools"></i></div>
-            <span>Ferramentas</span>
-        </a>
-        <a href="{{ url_for('catalogo', cat='plasticos') }}" class="cat-card">
-            <div class="cat-icon"><i class="fas fa-trash-alt"></i></div>
-            <span>Plásticos e Descartáveis</span>
-        </a>
-        <a href="{{ url_for('catalogo', cat='brinquedos') }}" class="cat-card">
-            <div class="cat-icon"><i class="fas fa-gamepad"></i></div>
-            <span>Brinquedos</span>
-        </a>
-    </section>
+<section class="category-grid">
+    <a href="{{ url_for('catalogo', cat='fresas') }}" class="cat-card">
+        <div class="cat-icon"><i class="fas fa-cogs"></i></div>
+        <span>Fresas e CNC</span>
+    </a>
+    <a href="{{ url_for('catalogo', cat='3d') }}" class="cat-card">
+        <div class="cat-icon"><i class="fas fa-cube"></i></div>
+        <span>3D Printer</span>
+    </a>
+    <a href="{{ url_for('catalogo', cat='ferramentas') }}" class="cat-card">
+        <div class="cat-icon"><i class="fas fa-tools"></i></div>
+        <span>Ferramentas</span>
+    </a>
+    <a href="{{ url_for('catalogo', cat='plasticos') }}" class="cat-card">
+        <div class="cat-icon"><i class="fas fa-trash-alt"></i></div>
+        <span>Plásticos</span>
+    </a>
+    <a href="{{ url_for('catalogo', cat='descartaveis') }}" class="cat-card">
+        <div class="cat-icon"><i class="fas fa-box-open"></i></div>
+        <span>Descartáveis</span>
+    </a>
+    <a href="{{ url_for('catalogo', cat='hobbies') }}" class="cat-card">
+        <div class="cat-icon"><i class="fas fa-gamepad"></i></div>
+        <span>Hobbies</span>
+    </a>
+</section>
 </div>
 {% endblock %}
 
